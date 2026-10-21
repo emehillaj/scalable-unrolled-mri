@@ -1,0 +1,149 @@
+# Training and evaluation commands for the models in the paper. Run them from the repository root.
+#
+# train.py writes local_data/results/<anatomy>_<method>_<chans>ch_<num_cascades>casc_<acceleration>x/
+# (or local_data/results/<run_name>/ when run_name is set). Add --data_path /path/to/fastMRI if the data
+# is not in local_data/datasets/fastMRI/, and --resume to continue an interrupted run. For several GPUs,
+# replace "python train.py" with "torchrun --standalone --nproc_per_node=4 train.py" or
+# "sbatch scripts/slurm_multigpu.sh". Runs train for max_epochs (200 in the configs); change it with
+# --set max_epochs=<N>. checkpoint.pt is overwritten at every save: copy it to keep a given epoch.
+#
+# evaluate.py writes local_data/results/eval/<tag>.json plus <tag>_slices.npz (and <tag>_volumes.npz
+# with --volume_metrics). Knee tables report the high/low-SNR split (snr_high, snr_low); brain tables
+# and the pooled knee table of the supplementary report the mean over all slices (pooled). The
+# volume-wise tables use the "volumes" entry.
+#
+# K-space Cold Diffusion is not part of this repository. To train and evaluate it, follow
+# https://github.com/GuoyaoShen/K-SapceColdDIffusion and report its results alongside the above.
+
+
+# Knee single-coil, T=15 (main table): train at 8x
+python train.py --config configs/knee/ours.json
+python train.py --config configs/knee/ours.json --chans 64
+python train.py --config configs/knee/ours.json --chans 96
+python train.py --config configs/knee/e2e.json
+python train.py --config configs/knee/e2e.json --chans 64 --set activation_checkpointing=true
+python train.py --config configs/knee/e2e.json --chans 96 --set activation_checkpointing=true
+python train.py --config configs/knee/gleam.json
+python train.py --config configs/knee/flat.json
+
+# Knee single-coil, T=15 (main table): train at 4x
+python train.py --config configs/knee/ours.json --acceleration 4
+python train.py --config configs/knee/ours.json --acceleration 4 --chans 64
+python train.py --config configs/knee/ours.json --acceleration 4 --chans 96
+python train.py --config configs/knee/e2e.json --acceleration 4
+python train.py --config configs/knee/e2e.json --acceleration 4 --chans 64 --set activation_checkpointing=true
+python train.py --config configs/knee/e2e.json --acceleration 4 --chans 96 --set activation_checkpointing=true
+python train.py --config configs/knee/gleam.json --acceleration 4
+python train.py --config configs/knee/flat.json --acceleration 4
+
+# Knee single-coil, T=15 (main table and volume-wise supplementary table): evaluate at 8x
+python evaluate.py --checkpoint local_data/results/knee_ours_32ch_15casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_ours_64ch_15casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_ours_96ch_15casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_e2e_32ch_15casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_e2e_64ch_15casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_e2e_96ch_15casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_gleam_32ch_15casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_flat_32ch_15casc_8x/checkpoint.pt --volume_metrics
+
+# Knee single-coil, T=15 (main table and volume-wise supplementary table): evaluate at 4x
+python evaluate.py --checkpoint local_data/results/knee_ours_32ch_15casc_4x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_ours_64ch_15casc_4x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_ours_96ch_15casc_4x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_e2e_32ch_15casc_4x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_e2e_64ch_15casc_4x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_e2e_96ch_15casc_4x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_gleam_32ch_15casc_4x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_flat_32ch_15casc_4x/checkpoint.pt --volume_metrics
+
+# Knee single-coil: models trained at 8x, evaluated at 4x (supplementary, cross-acceleration)
+python evaluate.py --checkpoint local_data/results/knee_ours_32ch_15casc_8x/checkpoint.pt --acceleration 4
+python evaluate.py --checkpoint local_data/results/knee_ours_64ch_15casc_8x/checkpoint.pt --acceleration 4
+python evaluate.py --checkpoint local_data/results/knee_ours_96ch_15casc_8x/checkpoint.pt --acceleration 4
+python evaluate.py --checkpoint local_data/results/knee_e2e_32ch_15casc_8x/checkpoint.pt --acceleration 4
+python evaluate.py --checkpoint local_data/results/knee_gleam_32ch_15casc_8x/checkpoint.pt --acceleration 4
+python evaluate.py --checkpoint local_data/results/knee_flat_32ch_15casc_8x/checkpoint.pt --acceleration 4
+
+# Knee and brain: other SNR thresholds (supplementary, threshold sensitivity from 25 to 45 dB for
+# every method). Re-split the per-slice snr_db in <tag>_slices.npz of the evaluations above, or rerun
+# with --snr_threshold <T>. A non-default threshold is part of the output tag (..._snr30).
+python evaluate.py --checkpoint local_data/results/knee_ours_96ch_15casc_8x/checkpoint.pt --snr_threshold 30
+
+
+# Brain multi-coil, T=15 (main table): train at 8x
+python train.py --config configs/brain/ours.json
+python train.py --config configs/brain/ours.json --chans 64
+python train.py --config configs/brain/ours.json --chans 96
+python train.py --config configs/brain/e2e.json
+python train.py --config configs/brain/gleam.json
+python train.py --config configs/brain/flat.json
+
+# Brain multi-coil, T=15 (main table): train at 4x
+python train.py --config configs/brain/ours.json --acceleration 4
+python train.py --config configs/brain/ours.json --acceleration 4 --chans 64
+python train.py --config configs/brain/ours.json --acceleration 4 --chans 96
+python train.py --config configs/brain/e2e.json --acceleration 4
+python train.py --config configs/brain/gleam.json --acceleration 4
+python train.py --config configs/brain/flat.json --acceleration 4
+
+# Brain multi-coil, T=15 (main table and volume-wise supplementary table): evaluate at 8x
+python evaluate.py --checkpoint local_data/results/brain_ours_32ch_15casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/brain_ours_64ch_15casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/brain_ours_96ch_15casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/brain_e2e_32ch_15casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/brain_gleam_32ch_15casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/brain_flat_32ch_15casc_8x/checkpoint.pt --volume_metrics
+
+# Brain multi-coil, T=15 (main table and volume-wise supplementary table): evaluate at 4x
+python evaluate.py --checkpoint local_data/results/brain_ours_32ch_15casc_4x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/brain_ours_64ch_15casc_4x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/brain_ours_96ch_15casc_4x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/brain_e2e_32ch_15casc_4x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/brain_gleam_32ch_15casc_4x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/brain_flat_32ch_15casc_4x/checkpoint.pt --volume_metrics
+
+
+# Knee 8x, capacity scaling, depth at C=32: train (the T=15 rows are the main-table runs above).
+# E2E + activation checkpointing has exactly the gradients of E2E, so its T=8 and T=15 rows reuse
+# the E2E runs.
+python train.py --config configs/knee/ours.json --num_cascades 8
+python train.py --config configs/knee/ours.json --num_cascades 25
+python train.py --config configs/knee/ours.json --num_cascades 50
+python train.py --config configs/knee/e2e.json --num_cascades 8
+python train.py --config configs/knee/e2e.json --num_cascades 25 --set activation_checkpointing=true
+
+# Knee 8x, capacity scaling, width at T=8: train (the C=32 rows are the depth runs above)
+python train.py --config configs/knee/ours.json --num_cascades 8 --chans 64
+python train.py --config configs/knee/ours.json --num_cascades 8 --chans 96
+python train.py --config configs/knee/ours.json --num_cascades 8 --chans 128
+python train.py --config configs/knee/e2e.json --num_cascades 8 --chans 64 --set activation_checkpointing=true
+python train.py --config configs/knee/e2e.json --num_cascades 8 --chans 96 --set activation_checkpointing=true
+
+# Knee 8x, capacity scaling: evaluate. The paper table uses the high-SNR slices, and the volume-wise
+# ablation table of the supplementary uses the "volumes" entry.
+python evaluate.py --checkpoint local_data/results/knee_ours_32ch_8casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_ours_32ch_25casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_ours_32ch_50casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_e2e_32ch_8casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_e2e_32ch_25casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_ours_64ch_8casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_ours_96ch_8casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_ours_128ch_8casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_e2e_64ch_8casc_8x/checkpoint.pt --volume_metrics
+python evaluate.py --checkpoint local_data/results/knee_e2e_96ch_8casc_8x/checkpoint.pt --volume_metrics
+
+
+# Peak training memory and step time (paper: one RTX A6000, batch 1, synthetic 640x372 single-coil
+# input, fp32, median of 50 steps after 10 warmup steps). Configurations that do not fit in GPU
+# memory are reported as OOM. Add --output <file>.json to keep the rows. The shared-TE
+# full-backpropagation curve of the figures is not covered by the profiler.
+# Capacity scaling table, depth at C=32 and width at T=8:
+python scripts/profile_memory.py --methods ours e2e e2e_ckpt --depths 8 15 25 50 --chans 32 --warmup 10 --reps 50
+python scripts/profile_memory.py --methods ours e2e e2e_ckpt --depths 8 --chans 32 64 96 128 --warmup 10 --reps 50
+# Memory curves (README figure): depth up to T=100 at C=32, width up to C=160 at T=15
+python scripts/profile_memory.py --methods ours e2e e2e_ckpt --depths 8 15 25 50 75 100 --chans 32 --warmup 10 --reps 50
+python scripts/profile_memory.py --methods ours e2e --depths 15 --chans 32 64 96 128 160 --warmup 10 --reps 50
+# Iteration time of activation checkpointing at C=96, T=15 (supplementary)
+python scripts/profile_memory.py --methods ours e2e_ckpt --depths 15 --chans 96 --warmup 10 --reps 50
+# Multi-coil input (16 coils, 640x320); not reported in the paper
+python scripts/profile_memory.py --coils 16 --height 640 --width 320 --depths 15

@@ -1,0 +1,9 @@
+# Tested with Python 3.13, torch 2.9.1 (CUDA 12.9) and the versions below. Older torch versions
+# are untested, and Python 3.13 needs torch >= 2.5.
+# Install torch and torchvision builds that match your CUDA driver first (https://pytorch.org).
+torch>=2.5
+fastmri==0.3.0
+numpy==2.3.5
+h5py==3.15.1
+scikit-image==0.26.0
+scipy==1.16.3

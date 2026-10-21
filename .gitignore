@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Editors
+.vscode/
+.idea/
+
+# Local data, dataset caches and results (see local_data/constants.py). No trailing
+# slash, so a symlinked directory is ignored as well.
+/local_data/datasets/fastMRI
+/local_data/cache
+/local_data/results
+
+# Checkpoints, caches and job logs
+*.pt
+*.pkl
+*.out
