@@ -10,7 +10,7 @@ The official implementation of [*Scalable Unrolled Chains for MRI Reconstruction
 *IEEE/CVF Winter Conference on Applications of Computer Vision (WACV) 2027* <br/>
 Emiljo Mëhillaj and Ender Konukoglu
 <br/>
-| [Conference](<CVF_URL>) | [arXiv](https://arxiv.org/abs/<ARXIV_ID>) | [Code](https://github.com/emehillaj/scalable-unrolled-mri) |
+| [Conference](<CVF_URL>) | [arXiv](https://arxiv.org/abs/2610.33695) | [Code](https://github.com/emehillaj/scalable-unrolled-mri) |
 <br/>
 
 ## Overview
